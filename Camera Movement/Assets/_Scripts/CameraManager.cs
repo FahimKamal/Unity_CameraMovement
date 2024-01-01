@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class CameraManager : MonoBehaviour
 {
     private Vector2 _delta;
+    private Vector2 _screenPosition;
     private bool _isMoving;
     private bool _isRotating;
 
@@ -11,6 +13,9 @@ public class CameraManager : MonoBehaviour
 
     [SerializeField] private float cameraMoveSpeed = 10f;
     [SerializeField] private float cameraRotateSpeed = .5f;
+    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private Text objNameDisplay;
+    [SerializeField] private LayerMask clickableLayer;
 
     private void Awake()
     {
@@ -33,10 +38,36 @@ public class CameraManager : MonoBehaviour
         _isRotating = context.started || context.performed;
     }
 
+    public void OnScreenPositionChange(InputAction.CallbackContext context)
+    {
+        _screenPosition = context.ReadValue<Vector2>();
+    }
+    
+    public void OnInteract(InputAction.CallbackContext context)
+    {
+        if (!context.started) return;
+        var ray = Camera.main.ScreenPointToRay(new Vector3(_screenPosition.x, _screenPosition.y, 0.0f));
+        if (Physics.Raycast(ray, out var hit, float.MaxValue))
+        {
+            if (hit.transform.TryGetComponent<Clickable>(out var obj))
+            {
+                Debug.Log(obj.name);
+                objNameDisplay.text = obj.name;
+            }
+            else
+            {
+                Debug.Log("nothing");
+                objNameDisplay.text = "nothing";
+            }
+        }
+
+    }
+
     private void LateUpdate()
     {
         if (_isMoving)
         {
+            // Debug.Log(_delta);
             var position = transform.right * (_delta.x * -cameraMoveSpeed);
             position += transform.forward * (_delta.y * -cameraMoveSpeed);
             transform.position += position * Time.deltaTime;
