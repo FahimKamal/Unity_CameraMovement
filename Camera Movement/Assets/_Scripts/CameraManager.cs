@@ -13,7 +13,6 @@ public class CameraManager : MonoBehaviour
 
     [SerializeField] private float cameraMoveSpeed = 10f;
     [SerializeField] private float cameraRotateSpeed = .5f;
-    [SerializeField] private Transform cameraTransform;
     [SerializeField] private Text objNameDisplay;
     [SerializeField] private LayerMask clickableLayer;
 
@@ -47,7 +46,7 @@ public class CameraManager : MonoBehaviour
     {
         if (!context.started) return;
         var ray = Camera.main.ScreenPointToRay(new Vector3(_screenPosition.x, _screenPosition.y, 0.0f));
-        if (Physics.Raycast(ray, out var hit, float.MaxValue))
+        if (Physics.Raycast(ray, out var hit, float.MaxValue, clickableLayer))
         {
             if (hit.transform.TryGetComponent<Clickable>(out var obj))
             {
